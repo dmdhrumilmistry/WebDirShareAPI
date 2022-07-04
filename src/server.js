@@ -1,24 +1,39 @@
 require("dotenv").config()
 const express = require("express")
-const fs = require('fs');
+const fs = require('fs')
+const nunjucks = require('nunjucks')
+const path = require('path')
 const upload = require('express-fileupload')
-const path = require('path');
 
+// express configurations
 const shareDirPath = process.env.SHARE_DIR || __dirname
 const PORT = process.env.PORT || 3000
 
+
 const app = express()
+
+// nunjucks configurations
+nunjucks.configure(path.join(__dirname, 'views'), {
+    autoescape: true,
+    express: app,
+    watch: true
+});
 
 // configure middlewares
 app.use(upload())
+app.use('/static', express.static(path.join(__dirname, 'static')))
 
-// Application Routes
-app.route('/').get(getDirList)
-app.route('/get/:dirPath').get(getDirList)
-app.route('/download/:filePath').get(handleDownload)
-app.route('/upload').post(handleUploadFile)
+// API Routes
+app.route('/api/').get(getDirList)
+app.route('/api/get/:dirPath').get(getDirList)
+app.route('/api/download/:filePath').get(handleDownload)
+app.route('/api/upload').post(handleUploadFile)
+
+// website routes
+app.route('/').get(home)
 
 
+// API functions
 async function getDirList(req, res) {
     // get directory path from url 
     let dirPath = req.params.dirPath
@@ -36,7 +51,7 @@ async function getDirList(req, res) {
         // if directory chunk is undefined then base directory is different
         // unauthorized access
         if (dirChunk == undefined) {
-            res.status(404).json({ "err": "invalid directory" })
+            res.status(404).json({ "error": "invalid directory" })
             return
         }
 
@@ -145,7 +160,7 @@ async function handleUploadFile(req, res, next) {
     console.log(location)
 
     // create directories if it doesn't exist
-    if (!fs.existsSync(location)){
+    if (!fs.existsSync(location)) {
         fs.mkdirSync(location, { recursive: true });
     }
 
@@ -153,12 +168,20 @@ async function handleUploadFile(req, res, next) {
     const filePath = path.join(location, file.name)
     file.mv(filePath, (error) => {
         if (error) {
-            res.status(500).json({'error': 'cannot save uploaded file'})
+            res.status(500).json({ 'error': 'cannot save uploaded file' })
             return
         }
         res.json({ 'status': 'uploaded' })
     })
 
+}
+
+
+// APP functions
+async function home(req, res){
+    res.render('index.html', {
+        'title' : 'WebDirShare'
+    })
 }
 
 app.listen(PORT, () => {

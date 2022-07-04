@@ -1,0 +1,53 @@
+{% extends 'base.html' %} {% block body %} {# Navigation Bar #}
+<nav class="navbar navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand " href="/"><strong>WebDirShare</strong></a>
+    <form class="d-flex">
+      <input
+        class="form-control me-2"
+        type="search"
+        placeholder="Search"
+        aria-label="Search"
+      />
+      <button class="btn btn-outline-success " type="submit">Search</button>
+    </form>
+  </div>
+</nav>
+{# End Navigation Bar #} {# CWD #}
+<div class="container-fluid text-center text-wrap fs-3 fw-bold fst-italic">
+    <p id="directory"></p>
+  </div>
+</div>
+{# DIRS #}
+<div id="directories" class="container p-4" onload="updateDirectoryName()">
+  <div class="card">
+    <div class="card-body">
+      No Directory
+    </div>
+  </div>
+</div>
+{# Files #}
+{# Scripts #}
+<script type="text/javascript">
+      async function updateDirectoryName(){
+        axios
+          .get('/api')
+          .then((response) => {
+            dir = document.getElementById("directory")
+            if (response.status == 200){
+                dir.innerText = response.data.dir
+            } else {
+                dir.innerText = "Cannot Get Current Directory Name"
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+          })
+      } 
+
+      async function updateDirectories(directory){
+        di
+      }
+      updateDirectoryName()
+      </script>
+{% endblock body %}
