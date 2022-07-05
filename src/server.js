@@ -142,7 +142,7 @@ async function handleUploadFile(req, res, next) {
     if (location != undefined) {
         location = Buffer.from(location, 'base64').toString('utf-8')
 
-        // check if directory data asked if part of share directory
+        // check if directory data asked is part of shared directory
         const filePathChunk = location.split(shareDirPath)[1]
 
         // if directory chunk is undefined then base directory is different

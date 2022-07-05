@@ -29,11 +29,27 @@
 
 {# Files #}
 <div class="container px-1">
-<div class="row row-cols-2 justify-content-center mx-1 my-1">
+  <div class="row row-cols-2 justify-content-center mx-1 my-1">
     <div id="files" class="container">
       <div class="card">
         <div class="card-body text-muted">
           Cannot Fetch Files Details
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Upload File #}
+<div class="container px-1">
+  <div class="row row-cols-2 justify-content-center mx-1 my-1">
+    <div class="container">
+      <div class="card">
+        <div class="card-body id=" uploadFileForm"
+          style="display: grid; gap: .5rem; grid-template-columns: auto 1fr; max-width: 500px; margin: 0 auto;">
+          <label for="file">File: </label>
+          <input type="file" id="file" name="file" required>
+          <button onclick="uploadFile()" class="btn btn-success" style="grid-column: span 2;">Upload</button>
         </div>
       </div>
     </div>
@@ -211,10 +227,47 @@
 
   }
 
+  async function uploadFile() {
+    // get current directory
+    if (currDir != '') {
+      dirPath = Base64.encode(currDir)
+    } else {
+      dirPath = ''
+    }
+    const file = document.getElementById('file').files[0]
+
+    // create form data to upload file
+    let formData = new FormData()
+    formData.append('location', currDir)
+    formData.append('file', file)
+
+    // make upload request
+    axios.post('/api/upload', formData, {
+      'headers': {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+      .then((response) => {
+        if (response.status == 200) {
+          updateDetails()
+        } else {
+          console.log(response.data)
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+  }
+
+  async function updateDetails() {
+    updateDirectoryName()
+    updateDirectories()
+    updateFiles()
+  }
+
   // invoke function
-  updateDirectoryName()
-  updateDirectories()
-  updateFiles()
+  updateDetails()
 </script>
 
 {% endblock body %}
