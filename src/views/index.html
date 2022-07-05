@@ -105,8 +105,15 @@
             <div class="col p-1 mx-1">
               <div class="card">
                 <div class="card-body">
-                  ${dirName}
-                  <span class="badge rounded-pill bg-info text-dark">dir</span>
+                  <div class="row">
+                    <div class="col text-start">
+                      ${dirName}
+                      <span class="badge rounded-pill bg-info text-dark">dir</span>
+                    </div>
+                    <div class="col-sm text-end">
+                      <a class="btn btn-success" type="button">Open</a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -155,7 +162,14 @@
             <div class="col p-1 mx-1">
               <div class="card">
                 <div class="card-body">
-                  ${fileName}
+                  <div class="row">
+                    <div class="col text-start">
+                      ${fileName}
+                    </div>
+                    <div class="col-sm text-end">
+                      <a class="btn btn-success" type="button">Download</a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -175,4 +189,5 @@
   updateDirectories()
   updateFiles()
 </script>
+
 {% endblock body %}
