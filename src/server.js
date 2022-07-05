@@ -8,7 +8,7 @@ const upload = require('express-fileupload')
 // express configurations
 const shareDirPath = process.env.SHARE_DIR || __dirname
 const PORT = process.env.PORT || 3000
-
+const platform = process.platform
 
 const app = express()
 
@@ -32,7 +32,8 @@ app.route('/api/upload').post(handleUploadFile)
 
 // website routes
 app.route('/').get(home)
-
+app.route('/open').get(home)
+app.route('/open/:path').get(home)
 
 // API functions
 async function getDirList(req, res) {
@@ -60,6 +61,7 @@ async function getDirList(req, res) {
     }
 
     let dirData = {
+        'pathType': platform,
         'shareDir': shareDirPath,
         'dir': dirPath,
         'dirs': [],
@@ -158,8 +160,6 @@ async function handleUploadFile(req, res, next) {
         return
     }
 
-    console.log(location)
-
     // create directories if it doesn't exist
     if (!fs.existsSync(location)) {
         fs.mkdirSync(location, { recursive: true });
@@ -180,8 +180,24 @@ async function handleUploadFile(req, res, next) {
 
 // APP functions
 async function home(req, res) {
+    let dirPath = req.params.path
+
+    // if parameter is not passed load home shared directory
+    if (dirPath == undefined) {
+        dirPath = ''
+    }
+
+    // get title
+    if (platform == 'win32' && dirPath != ''){
+        title = Buffer.from(dirPath,'base64').toString('utf-8').split('\\')
+        title = title[title.length - 1]
+    } else {
+        title = 'WebDirShare'
+    }
+    
     res.render('index.html', {
-        'title': 'WebDirShare'
+        'title': title,
+        'currDir': dirPath
     })
 }
 

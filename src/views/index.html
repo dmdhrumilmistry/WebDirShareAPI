@@ -44,13 +44,19 @@
 
 {# Scripts #}
 <script type="text/javascript">
-  let currDir = ''
+  let currDir = null
+  {% if currDir %}
+  currDir = "{{currDir}}"
+  {% else %}
+  currDir = ''
+  {% endif %}
 
   async function updateDirectoryName() {
     // get current directory
     let dirPath = null
     if (currDir != '') {
-      dirPath = Buffer.from(currDir, 'utf-8').toString('base64')
+      dirPath = currDir
+      console.log(currDir)
     } else {
       dirPath = ''
     }
@@ -77,15 +83,16 @@
 
     // get current directory
     if (currDir != '') {
-      dirPath = Buffer.from(currDir, 'utf-8').toString('base64')
+      dirPath = Base64.encode(currDir)
     } else {
       dirPath = ''
     }
 
-    // make request to AsPI
+    // make request to API
     axios
       .get(`/api/get/${currDir}`)
       .then((response) => {
+        // default directory content 
         let content = `
         <div class="col p-1 mx-1">
           <div class="card">
@@ -95,12 +102,23 @@
           </div>
         </div>
           `
+
         if (response.status == 200) {
+          const pathType = response.data.pathType
           // reset content 
           content = ''
 
           // create directories cards
           response.data.dirs.forEach((dirName, id) => {
+            // create openLink to open new directory
+            let openLink = null
+            let dirPath = null
+            if (pathType == 'win32') {
+              dirPath = `${response.data.dir}\\${dirName}`
+            } else {
+              dirPath = `${response.data.dir}/${dirName}`
+            }
+            openLink = `/open/${Base64.encode(dirPath)}`
             content += `
             <div class="col p-1 mx-1">
               <div class="card">
@@ -111,7 +129,7 @@
                       <span class="badge rounded-pill bg-info text-dark">dir</span>
                     </div>
                     <div class="col-sm text-end">
-                      <a class="btn btn-success" type="button">Open</a>
+                      <a href="${openLink}"class="btn btn-success" type="button">Open</a>
                     </div>
                   </div>
                 </div>
@@ -122,9 +140,6 @@
         }
         container.innerHTML = content
       })
-      .catch((error) => {
-        console.error(error);
-      })
 
   }
 
@@ -134,7 +149,7 @@
 
     // get current directory
     if (currDir != '') {
-      dirPath = Buffer.from(currDir, 'utf-8').toString('base64')
+      dirPath = Base64.encode(currDir)
     } else {
       dirPath = ''
     }
@@ -153,11 +168,23 @@
         </div>
           `
         if (response.status == 200) {
+          const pathType = response.data.pathType
           // reset content 
           content = ''
 
-          // create directories cards
+          // create files cards
           response.data.files.forEach((fileName, id) => {
+            // create download link
+            let downloadLink = null
+            let filePath = null
+            if (pathType == 'win32') {
+              filePath = `${response.data.dir}\\${fileName}`
+            } else {
+              filePath = `${response.data.dir}/${fileName}`
+            }
+            downloadLink = `/api/download/${Base64.encode(filePath)}`
+
+            // create card
             content += `
             <div class="col p-1 mx-1">
               <div class="card">
@@ -167,7 +194,7 @@
                       ${fileName}
                     </div>
                     <div class="col-sm text-end">
-                      <a class="btn btn-success" type="button">Download</a>
+                      <a href="${downloadLink}"class="btn btn-success" type="button">Download</a>
                     </div>
                   </div>
                 </div>
