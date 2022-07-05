@@ -15,9 +15,9 @@
 </div>
 
 {# DIRS #}
-<div class="container px-4 px-lg-5 mt-5">
-  <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-xl-4 justify-content-center mx-2 my-2">
-    <div id="directories" class="container p-4">
+<div class="container px-1">
+  <div class="row row-cols-2 justify-content-center mx-1 my-1">
+    <div id="directories" class="container">
       <div class="card">
         <div class="card-body text-muted">
           Cannot Fetch Directories Details
@@ -28,9 +28,9 @@
 </div>
 
 {# Files #}
-<div class="container px-4 px-lg-5 mt-5">
-  <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-xl-4 justify-content-center mx-2 my-2">
-    <div id="files" class="container p-4">
+<div class="container px-1">
+<div class="row row-cols-2 justify-content-center mx-1 my-1">
+    <div id="files" class="container">
       <div class="card">
         <div class="card-body text-muted">
           Cannot Fetch Files Details
@@ -94,7 +94,7 @@
       .then((response) => {
         // default directory content 
         let content = `
-        <div class="col p-1 mx-1">
+        <div class="col p-1">
           <div class="card">
             <div class="card-body text-muted">
               No Directories Found
@@ -120,7 +120,7 @@
             }
             openLink = `/open/${Base64.encode(dirPath)}`
             content += `
-            <div class="col p-1 mx-1">
+            <div class="col p-1">
               <div class="card">
                 <div class="card-body">
                   <div class="row">
@@ -159,7 +159,7 @@
       .get(`/api/get/${currDir}`)
       .then((response) => {
         let content = `
-        <div class="col p-1 mx-1">
+        <div class="col p-1">
           <div class="card">
             <div class="card-body text-muted">
               No Files Found
@@ -186,7 +186,7 @@
 
             // create card
             content += `
-            <div class="col p-1 mx-1">
+            <div class="col p-1">
               <div class="card">
                 <div class="card-body">
                   <div class="row">
