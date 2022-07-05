@@ -3,51 +3,176 @@
   <div class="container-fluid">
     <a class="navbar-brand " href="/"><strong>WebDirShare</strong></a>
     <form class="d-flex">
-      <input
-        class="form-control me-2"
-        type="search"
-        placeholder="Search"
-        aria-label="Search"
-      />
+      <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
       <button class="btn btn-outline-success " type="submit">Search</button>
     </form>
   </div>
 </nav>
 {# End Navigation Bar #} {# CWD #}
 <div class="container-fluid text-center text-wrap fs-3 fw-bold fst-italic">
-    <p id="directory"></p>
-  </div>
+  <p id="directory"></p>
 </div>
+</div>
+
 {# DIRS #}
-<div id="directories" class="container p-4" onload="updateDirectoryName()">
-  <div class="card">
-    <div class="card-body">
-      No Directory
+<div class="container px-4 px-lg-5 mt-5">
+  <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-xl-4 justify-content-center mx-2 my-2">
+    <div id="directories" class="container p-4">
+      <div class="card">
+        <div class="card-body text-muted">
+          Cannot Fetch Directories Details
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
 {# Files #}
+<div class="container px-4 px-lg-5 mt-5">
+  <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-xl-4 justify-content-center mx-2 my-2">
+    <div id="files" class="container p-4">
+      <div class="card">
+        <div class="card-body text-muted">
+          Cannot Fetch Files Details
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 {# Scripts #}
 <script type="text/javascript">
-      async function updateDirectoryName(){
-        axios
-          .get('/api')
-          .then((response) => {
-            dir = document.getElementById("directory")
-            if (response.status == 200){
-                dir.innerText = response.data.dir
-            } else {
-                dir.innerText = "Cannot Get Current Directory Name"
-            }
-          })
-          .catch((error) => {
-            console.error(error);
-          })
-      } 
+  let currDir = ''
 
-      async function updateDirectories(directory){
-        di
-      }
-      updateDirectoryName()
-      </script>
+  async function updateDirectoryName() {
+    // get current directory
+    let dirPath = null
+    if (currDir != '') {
+      dirPath = Buffer.from(currDir, 'utf-8').toString('base64')
+    } else {
+      dirPath = ''
+    }
+
+    // make request to API
+    axios
+      .get(`/api/get/${currDir}`)
+      .then((response) => {
+        dir = document.getElementById("directory")
+        if (response.status == 200) {
+          dir.innerText = response.data.dir
+        } else {
+          dir.innerText = "Cannot Get Current Directory Name"
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+  }
+
+  async function updateDirectories(directory) {
+    const container = document.getElementById('directories')
+    let dirPath = null
+
+    // get current directory
+    if (currDir != '') {
+      dirPath = Buffer.from(currDir, 'utf-8').toString('base64')
+    } else {
+      dirPath = ''
+    }
+
+    // make request to AsPI
+    axios
+      .get(`/api/get/${currDir}`)
+      .then((response) => {
+        let content = `
+        <div class="col p-1 mx-1">
+          <div class="card">
+            <div class="card-body text-muted">
+              No Directories Found
+            </div>
+          </div>
+        </div>
+          `
+        if (response.status == 200) {
+          // reset content 
+          content = ''
+
+          // create directories cards
+          response.data.dirs.forEach((dirName, id) => {
+            content += `
+            <div class="col p-1 mx-1">
+              <div class="card">
+                <div class="card-body">
+                  ${dirName}
+                  <span class="badge rounded-pill bg-info text-dark">dir</span>
+                </div>
+              </div>
+            </div>
+            `
+          })
+        }
+        container.innerHTML = content
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+
+  }
+
+  async function updateFiles(directory) {
+    const container = document.getElementById('files')
+    let dirPath = null
+
+    // get current directory
+    if (currDir != '') {
+      dirPath = Buffer.from(currDir, 'utf-8').toString('base64')
+    } else {
+      dirPath = ''
+    }
+
+    // make request to API
+    axios
+      .get(`/api/get/${currDir}`)
+      .then((response) => {
+        let content = `
+        <div class="col p-1 mx-1">
+          <div class="card">
+            <div class="card-body text-muted">
+              No Files Found
+            </div>
+          </div>
+        </div>
+          `
+        if (response.status == 200) {
+          // reset content 
+          content = ''
+
+          // create directories cards
+          response.data.files.forEach((fileName, id) => {
+            content += `
+            <div class="col p-1 mx-1">
+              <div class="card">
+                <div class="card-body">
+                  ${fileName}
+                </div>
+              </div>
+            </div>
+            `
+          })
+        }
+        container.innerHTML = content
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+
+  }
+
+  // invoke function
+  updateDirectoryName()
+  updateDirectories()
+  updateFiles()
+</script>
 {% endblock body %}

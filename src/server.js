@@ -22,9 +22,10 @@ nunjucks.configure(path.join(__dirname, 'views'), {
 // configure middlewares
 app.use(upload())
 app.use('/static', express.static(path.join(__dirname, 'static')))
+app.disable('x-powered-by')
 
 // API Routes
-app.route('/api/').get(getDirList)
+app.route('/api/get').get(getDirList)
 app.route('/api/get/:dirPath').get(getDirList)
 app.route('/api/download/:filePath').get(handleDownload)
 app.route('/api/upload').post(handleUploadFile)
@@ -178,9 +179,9 @@ async function handleUploadFile(req, res, next) {
 
 
 // APP functions
-async function home(req, res){
+async function home(req, res) {
     res.render('index.html', {
-        'title' : 'WebDirShare'
+        'title': 'WebDirShare'
     })
 }
 
