@@ -37,11 +37,75 @@ WebDirShareAPI is written in node.js using express which helps to download/uploa
 
 ## Endpoints
 
-|      Endpoint      | Method | Description                                                         | POST Method Form Body |
-| :----------------: | :----: | :------------------------------------------------------------------ | :-------------------: |
-|         /          |  GET   | Get files and directories of shared directory                       |           -           |
-|    /get/dirPath    |  GET   | Get files and directories of specific directory in shared directory |           -           |
-| /download/filePath |  GET   | Download specific File                                              |           -           |
-|      /upload       |  POST  | Upload file to a specfic location                                   |    location, file     |
+|        Endpoint        | Method | Description                                                         | POST Method Form Body |
+| :--------------------: | :----: | :------------------------------------------------------------------ | :-------------------: |
+|    /api/get/dirPath    |  GET   | Get files and directories of specific directory in shared directory |           -           |
+| /api/download/filePath |  GET   | Download specific File                                              |           -           |
+|      /api/upload       |  POST  | Upload file to a specfic location                                   |    location, file     |
 
 > `Note`: dirPath, filePath and location should be complete path within the shared directory in base64 format
+
+## Dockerize Project
+
+### Build
+
+- using docker build project
+
+  ```bash
+  docker build . -t <app-name>
+  ```
+
+- Start Application
+
+  ```bash
+  docker run -p <localport>:<container-port> -d <app-name>
+  # outputs container id
+  <container-id>
+  ```
+
+  > Default container port : 80  
+  > Application can be acccessed from http://127.0.0.1:[local-port]/
+
+### Pull Docker Image
+
+- Pull Image
+
+  ```bash
+  docker pull dmdhrumilmistry/webdirshare
+  ```
+
+- Start Application
+
+  ```bash
+  docker run -p <localport>:80 -d <app-name>
+  # outputs container id
+  <container-id>
+  ```
+
+  > Application can be acccessed from http://127.0.0.1:[local-port]/
+
+### Managing Files manually
+
+- Get bash shell of the container
+
+  ```bash
+  docker  exec -it <container-id> "bash"
+  ```
+
+## Stop and Delete Container Data
+
+- Stop Service
+
+  ```bash
+  docker kill <container-id>
+  ```
+
+- remove container
+
+  ```bash
+  docker rm <container-id>
+  ```
+
+## TODO
+
+- [ ] Implement Search in API and UI
