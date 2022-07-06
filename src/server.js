@@ -34,6 +34,12 @@ app.route('/api/upload').post(handleUploadFile)
 app.route('/').get(home)
 app.route('/open').get(home)
 app.route('/open/:path').get(home)
+app.route('/about').get(about)
+
+// if any route isn't match render 404 page
+app.all('*', (req, res) => {
+    res.status(404).render('404.html')
+})
 
 // API functions
 async function getDirList(req, res) {
@@ -149,7 +155,7 @@ async function handleUploadFile(req, res, next) {
 
         // if directory chunk is undefined then base directory is different
         // unauthorized access
-        if (filePathChunk == undefined && saveRoot != 'true' ) {
+        if (filePathChunk == undefined && saveRoot != 'true') {
             res.status(401).json({ "err": "unauthorized access" })
             return
         } else {
@@ -205,6 +211,11 @@ async function home(req, res) {
     })
 }
 
+async function about(req, res) {
+    res.render('about.html')
+}
+
+// start application
 app.listen(PORT, () => {
     console.log('[*] Application Started on PORT:', PORT)
     console.log('[*] Sharing Directory:', shareDirPath)
