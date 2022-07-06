@@ -1,19 +1,10 @@
-{% extends 'base.html' %} {% block body %} {# Navigation Bar #}
-<nav class="navbar navbar-light bg-light">
-  <div class="container-fluid">
-    <a class="navbar-brand " href="/"><strong>WebDirShare</strong></a>
-    <form class="d-flex">
-      <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-      <button class="btn btn-outline-success " type="submit">Search</button>
-    </form>
-  </div>
-</nav>
-{# End Navigation Bar #} {# CWD #}
+{% extends 'base.html' %} {% block body %} {# CWD #}
 <div class="container-fluid text-center text-wrap fs-3 fw-bold fst-italic">
   <p id="directory"></p>
 </div>
 </div>
-
+{# CURRENT DIRECTORY #}
+<input id="currDir" value="{{currDir}}" hidden>
 {# DIRS #}
 <div class="container px-1">
   <div class="row row-cols-2 justify-content-center mx-1 my-1">
@@ -26,7 +17,6 @@
     </div>
   </div>
 </div>
-
 {# Files #}
 <div class="container px-1">
   <div class="row row-cols-2 justify-content-center mx-1 my-1">
@@ -39,7 +29,6 @@
     </div>
   </div>
 </div>
-
 {# Upload File #}
 <div class="container px-1">
   <div class="row row-cols-2 justify-content-center mx-1 my-1">
@@ -55,24 +44,15 @@
     </div>
   </div>
 </div>
-
-
-
 {# Scripts #}
 <script type="text/javascript">
-  let currDir = null
-  {% if currDir %}
-  currDir = "{{currDir}}"
-  {% else %}
-  currDir = ''
-  {% endif %}
+  let currDir = document.getElementById('currDir').value
 
   async function updateDirectoryName() {
     // get current directory
     let dirPath = null
     if (currDir != '') {
       dirPath = currDir
-      console.log(currDir)
     } else {
       dirPath = ''
     }
@@ -228,11 +208,15 @@
   }
 
   async function uploadFile() {
-    // get current directory
+    // if current directory if root of Shared directory then
+    // add saveDir flag
+    let saveRoot = false
     if (currDir != '') {
       dirPath = Base64.encode(currDir)
+      saveRoot = false
     } else {
       dirPath = ''
+      saveRoot = true
     }
     const file = document.getElementById('file').files[0]
 
@@ -240,8 +224,12 @@
     let formData = new FormData()
     formData.append('location', currDir)
     formData.append('file', file)
+    formData.append('saveRoot', saveRoot)
+
+    console.log(currDir, file, saveRoot)
 
     // make upload request
+    axios.post()
     axios.post('/api/upload', formData, {
       'headers': {
         'Content-Type': 'multipart/form-data'

@@ -130,11 +130,13 @@ async function handleUploadFile(req, res, next) {
     // check for file
     let file = null
     let location = null
+    let saveRoot = null // bool
     try {
         file = req.files.file
         location = req.body.location
+        saveRoot = req.body.saveRoot.toLowerCase() // save to root of shared directory
     } catch (TypeError) {
-        res.status(400).json({ 'error': 'file and location required' })
+        res.status(400).json({ 'error': 'file, location and saveRoot required' })
         return
     }
 
@@ -143,13 +145,15 @@ async function handleUploadFile(req, res, next) {
         location = Buffer.from(location, 'base64').toString('utf-8')
 
         // check if directory data asked is part of shared directory
-        const filePathChunk = location.split(shareDirPath)[1]
+        let filePathChunk = location.split(shareDirPath)[1]
 
         // if directory chunk is undefined then base directory is different
         // unauthorized access
-        if (filePathChunk == undefined) {
+        if (filePathChunk == undefined && saveRoot != 'true' ) {
             res.status(401).json({ "err": "unauthorized access" })
             return
+        } else {
+            filePathChunk = ''
         }
 
         // join file path
@@ -188,13 +192,13 @@ async function home(req, res) {
     }
 
     // get title
-    if (platform == 'win32' && dirPath != ''){
-        title = Buffer.from(dirPath,'base64').toString('utf-8').split('\\')
+    if (platform == 'win32' && dirPath != '') {
+        title = Buffer.from(dirPath, 'base64').toString('utf-8').split('\\')
         title = title[title.length - 1]
     } else {
         title = 'WebDirShare'
     }
-    
+
     res.render('index.html', {
         'title': title,
         'currDir': dirPath

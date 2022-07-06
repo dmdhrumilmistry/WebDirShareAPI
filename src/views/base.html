@@ -20,10 +20,20 @@
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   {# Base64 #}
   <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.2/base64.min.js"></script>
-  <title>{{title}}</title>
 </head>
 
 <body>
+  {# Navigation Bar #}
+  <nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand " href="/"><strong>WebDirShare</strong></a>
+      <form class="d-flex">
+        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+        <button class="btn btn-outline-success " type="submit">Search</button>
+      </form>
+    </div>
+  </nav>
+  {# End Navigation Bar #}
   {% block body %} {% endblock body %}
 </body>
 
