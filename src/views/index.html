@@ -34,15 +34,20 @@
   <div class="row row-cols-2 justify-content-center mx-1 my-1">
     <div class="container">
       <div class="card">
-        <div class="card-body id=" uploadFileForm"
+        <div class="card-body" id="uploadFileForm"
           style="display: grid; gap: .5rem; grid-template-columns: auto 1fr; max-width: 500px; margin: 0 auto;">
-          <label for="file">File: </label>
-          <input type="file" id="file" name="file" required>
+          <div class="input-group mb-3">
+            <input type="file" id="file" name="file" class="form-control" placeholder="Choose Files">
+          </div>
           <button onclick="uploadFile()" class="btn btn-success" style="grid-column: span 2;">Upload</button>
+          {# For Alerts #}
+          <div id="alerts">
+          </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 </div>
 {# Scripts #}
 <script type="text/javascript">
@@ -220,13 +225,23 @@
     }
     const file = document.getElementById('file').files[0]
 
+    // if file is not selected warn user
+    let alertsDiv = document.getElementById('alerts')
+    if (file == undefined) {
+      alertsDiv.innerHTML = `
+      <div class="alert alert-warning fade show text-center" role="alert">
+          <strong>File Not Selected!</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      `
+      return
+    }
+
     // create form data to upload file
     let formData = new FormData()
     formData.append('location', currDir)
     formData.append('file', file)
     formData.append('saveRoot', saveRoot)
-
-    console.log(currDir, file, saveRoot)
 
     // make upload request
     axios.post()
@@ -237,9 +252,20 @@
     })
       .then((response) => {
         if (response.status == 200) {
+          alertsDiv.innerHTML = `
+          <div class="alert alert-success fade show text-center" role="alert">
+              <strong>File Uploaded Successfully</strong>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          `
           updateDetails()
         } else {
-          console.log(response.data)
+          alertsDiv.innerHTML = `
+          <div class="alert alert-danger fade show text-center" role="alert">
+              <strong>Upload Failed</strong>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          `
         }
       })
       .catch((error) => {
