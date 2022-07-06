@@ -1,0 +1,287 @@
+{% extends 'base.html' %} {% block body %} {# CWD #}
+<div class="container-fluid text-center text-wrap fs-3 fw-bold fst-italic">
+  <p id="directory"></p>
+</div>
+</div>
+{# CURRENT DIRECTORY #}
+<input id="currDir" value="{{currDir}}" hidden>
+{# DIRS #}
+<div class="container px-1">
+  <div class="row row-cols-2 justify-content-center mx-1 my-1">
+    <div id="directories" class="container">
+      <div class="card">
+        <div class="card-body text-muted">
+          Cannot Fetch Directories Details
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{# Files #}
+<div class="container px-1">
+  <div class="row row-cols-2 justify-content-center mx-1 my-1">
+    <div id="files" class="container">
+      <div class="card">
+        <div class="card-body text-muted">
+          Cannot Fetch Files Details
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{# Upload File #}
+<div class="container px-1">
+  <div class="row row-cols-2 justify-content-center mx-1 my-1">
+    <div class="container">
+      <div class="card">
+        <div class="card-body" id="uploadFileForm"
+          style="display: grid; gap: .5rem; grid-template-columns: auto 1fr; max-width: 500px; margin: 0 auto;">
+          <div class="input-group mb-3">
+            <input type="file" id="file" name="file" class="form-control" placeholder="Choose Files">
+          </div>
+          <button onclick="uploadFile()" class="btn btn-success" style="grid-column: span 2;">Upload</button>
+          {# For Alerts #}
+          <div id="alerts">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+{# Scripts #}
+<script type="text/javascript">
+  let currDir = document.getElementById('currDir').value
+
+  async function updateDirectoryName() {
+    // get current directory
+    let dirPath = null
+    if (currDir != '') {
+      dirPath = currDir
+    } else {
+      dirPath = ''
+    }
+
+    // make request to API
+    axios
+      .get(`/api/get/${currDir}`)
+      .then((response) => {
+        dir = document.getElementById("directory")
+        if (response.status == 200) {
+          dir.innerText = response.data.dir
+        } else {
+          dir.innerText = "Cannot Get Current Directory Name"
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+  }
+
+  async function updateDirectories(directory) {
+    const container = document.getElementById('directories')
+    let dirPath = null
+
+    // get current directory
+    if (currDir != '') {
+      dirPath = Base64.encode(currDir)
+    } else {
+      dirPath = ''
+    }
+
+    // make request to API
+    axios
+      .get(`/api/get/${currDir}`)
+      .then((response) => {
+        // default directory content 
+        let content = `
+        <div class="col p-1">
+          <div class="card">
+            <div class="card-body text-muted">
+              No Directories Found
+            </div>
+          </div>
+        </div>
+          `
+
+        if (response.status == 200) {
+          const pathType = response.data.pathType
+          // reset content 
+          content = ''
+
+          // create directories cards
+          response.data.dirs.forEach((dirName, id) => {
+            // create openLink to open new directory
+            let openLink = null
+            let dirPath = null
+            if (pathType == 'win32') {
+              dirPath = `${response.data.dir}\\${dirName}`
+            } else {
+              dirPath = `${response.data.dir}/${dirName}`
+            }
+            openLink = `/open/${Base64.encode(dirPath)}`
+            content += `
+            <div class="col p-1">
+              <div class="card">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col text-start">
+                      ${dirName}
+                      <span class="badge rounded-pill bg-info text-dark">dir</span>
+                    </div>
+                    <div class="col-sm text-end">
+                      <a href="${openLink}"class="btn btn-success" type="button">Open</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            `
+          })
+        }
+        container.innerHTML = content
+      })
+
+  }
+
+  async function updateFiles(directory) {
+    const container = document.getElementById('files')
+    let dirPath = null
+
+    // get current directory
+    if (currDir != '') {
+      dirPath = Base64.encode(currDir)
+    } else {
+      dirPath = ''
+    }
+
+    // make request to API
+    axios
+      .get(`/api/get/${currDir}`)
+      .then((response) => {
+        let content = `
+        <div class="col p-1">
+          <div class="card">
+            <div class="card-body text-muted">
+              No Files Found
+            </div>
+          </div>
+        </div>
+          `
+        if (response.status == 200) {
+          const pathType = response.data.pathType
+          // reset content 
+          content = ''
+
+          // create files cards
+          response.data.files.forEach((fileName, id) => {
+            // create download link
+            let downloadLink = null
+            let filePath = null
+            if (pathType == 'win32') {
+              filePath = `${response.data.dir}\\${fileName}`
+            } else {
+              filePath = `${response.data.dir}/${fileName}`
+            }
+            downloadLink = `/api/download/${Base64.encode(filePath)}`
+
+            // create card
+            content += `
+            <div class="col p-1">
+              <div class="card">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col text-start">
+                      ${fileName}
+                    </div>
+                    <div class="col-sm text-end">
+                      <a href="${downloadLink}"class="btn btn-success" type="button">Download</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            `
+          })
+        }
+        container.innerHTML = content
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+
+  }
+
+  async function uploadFile() {
+    // if current directory if root of Shared directory then
+    // add saveDir flag
+    let saveRoot = false
+    if (currDir != '') {
+      dirPath = Base64.encode(currDir)
+      saveRoot = false
+    } else {
+      dirPath = ''
+      saveRoot = true
+    }
+    const file = document.getElementById('file').files[0]
+
+    // if file is not selected warn user
+    let alertsDiv = document.getElementById('alerts')
+    if (file == undefined) {
+      alertsDiv.innerHTML = `
+      <div class="alert alert-warning fade show text-center" role="alert">
+          <strong>File Not Selected!</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      `
+      return
+    }
+
+    // create form data to upload file
+    let formData = new FormData()
+    formData.append('location', currDir)
+    formData.append('file', file)
+    formData.append('saveRoot', saveRoot)
+
+    // make upload request
+    axios.post()
+    axios.post('/api/upload', formData, {
+      'headers': {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+      .then((response) => {
+        if (response.status == 200) {
+          alertsDiv.innerHTML = `
+          <div class="alert alert-success fade show text-center" role="alert">
+              <strong>File Uploaded Successfully</strong>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          `
+          updateDetails()
+        } else {
+          alertsDiv.innerHTML = `
+          <div class="alert alert-danger fade show text-center" role="alert">
+              <strong>Upload Failed</strong>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          `
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+  }
+
+  async function updateDetails() {
+    updateDirectoryName()
+    updateDirectories()
+    updateFiles()
+  }
+
+  // invoke function
+  updateDetails()
+</script>
+
+{% endblock body %}
